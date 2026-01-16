@@ -11,21 +11,24 @@ const REVIEWS = [
     text: "Trupia provided exactly what we needed for our site prep. The excavator was in top condition and delivered on time.",
     author: "John D.",
     role: "Site Manager",
-    rating: 5
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=150&h=150"
   },
   {
     id: 2,
     text: "Fast delivery and transparent rates. Their team went above and beyond to get us the equipment for a last-minute job.",
     author: "Sarah Jenkins",
     role: "General Contractor",
-    rating: 5
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?fit=crop&w=150&h=150"
   },
   {
     id: 3,
     text: "Their heavy haul logistics team saved us a huge headache moving our crane across state lines. Highly recommended.",
     author: "Mike Ross",
     role: "Industrial Solutions",
-    rating: 5
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fit=crop&w=150&h=150"
   }
 ];
 
@@ -262,9 +265,11 @@ const Home: React.FC = () => {
                 </div>
                 <p className="text-slate-600 mb-6 font-medium italic leading-relaxed">"{review.text}"</p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-brand-black flex items-center justify-center text-white font-bold text-sm mr-3">
-                    {review.author.charAt(0)}
-                  </div>
+                  <img 
+                    src={review.image} 
+                    alt={review.author} 
+                    className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
+                  />
                   <div>
                     <p className="text-slate-900 font-bold text-sm">{review.author}</p>
                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wide">{review.role}</p>

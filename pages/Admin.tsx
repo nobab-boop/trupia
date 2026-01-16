@@ -2,11 +2,20 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
 import { Lead, LeadStatus } from '../types';
-import { Search, Filter, CheckCircle, XCircle, Clock, AlertCircle, Trash2 } from 'lucide-react';
+import { Search, Filter, CheckCircle, XCircle, Clock, AlertCircle, Trash2, KeyRound } from 'lucide-react';
 
 const Admin: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Login State
   const [password, setPassword] = useState('');
+  
+  // Reset Password State
+  const [isResetMode, setIsResetMode] = useState(false);
+  const [masterKey, setMasterKey] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  // Dashboard Data State
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filter, setFilter] = useState<LeadStatus | 'All'>('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,19 +25,47 @@ const Admin: React.FC = () => {
     const savedLeads = JSON.parse(localStorage.getItem('leads') || '[]');
     setLeads(savedLeads);
     
-    // Check if previously authenticated session exists (optional/simple version)
+    // Check if previously authenticated session exists
     const session = sessionStorage.getItem('adminSession');
     if (session === 'true') setIsAuthenticated(true);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'admin123') {
+    // Default password is 'admin123' if not set in localStorage
+    const currentStoredPassword = localStorage.getItem('adminPassword') || 'admin123';
+    
+    if (password === currentStoredPassword) {
       setIsAuthenticated(true);
       sessionStorage.setItem('adminSession', 'true');
+      setPassword('');
     } else {
       alert('Incorrect password');
     }
+  };
+
+  const handleResetPassword = (e: React.FormEvent) => {
+      e.preventDefault();
+      const MASTER_KEY_HASH = 'nafimprd061226'; 
+      
+      if (masterKey !== MASTER_KEY_HASH) {
+          alert('Invalid Master Key. Access Denied.');
+          return;
+      }
+      
+      if (newPassword.trim().length < 4) {
+          alert('New password must be at least 4 characters long.');
+          return;
+      }
+
+      localStorage.setItem('adminPassword', newPassword);
+      alert('Password successfully updated! Please log in with your new credentials.');
+      
+      // Reset state and go back to login
+      setIsResetMode(false);
+      setMasterKey('');
+      setNewPassword('');
+      setPassword('');
   };
 
   const handleLogout = () => {
@@ -75,22 +112,82 @@ const Admin: React.FC = () => {
     return (
       <Layout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center bg-slate-50">
-          <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100 max-w-md w-full">
-            <h1 className="text-2xl font-bold text-slate-900 mb-6 text-center">Admin Access</h1>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
-                <input 
-                  type="password" 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter admin password"
-                />
-              </div>
-              <Button fullWidth type="submit">Login</Button>
-            </form>
-            <p className="mt-4 text-xs text-center text-gray-400">Hint: admin123</p>
+          <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100 max-w-md w-full transition-all">
+            
+            <div className="text-center mb-8">
+               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-brand/10 text-brand mb-4">
+                  <KeyRound size={24} />
+               </div>
+               <h1 className="text-2xl font-bold text-slate-900">
+                   {isResetMode ? 'System Recovery' : 'Admin Portal'}
+               </h1>
+               <p className="text-slate-500 text-sm mt-1">
+                   {isResetMode ? 'Use your Master Key to reset credentials' : 'Secure access for authorized personnel'}
+               </p>
+            </div>
+
+            {isResetMode ? (
+                /* Reset Mode Form */
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Master Key</label>
+                        <input 
+                          type="password" 
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-all"
+                          value={masterKey}
+                          onChange={(e) => setMasterKey(e.target.value)}
+                          placeholder="Enter Master Key"
+                          autoFocus
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">New Password</label>
+                        <input 
+                          type="password" 
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-all"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                        />
+                    </div>
+                    <Button fullWidth type="submit" className="shadow-lg shadow-brand/20">Update Password</Button>
+                    <button 
+                        type="button"
+                        onClick={() => { setIsResetMode(false); setMasterKey(''); setNewPassword(''); }}
+                        className="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                </form>
+            ) : (
+                /* Login Mode Form */
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Password</label>
+                    <input 
+                      type="password" 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-all"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter access code"
+                      autoFocus
+                    />
+                  </div>
+                  <Button fullWidth type="submit" className="shadow-lg shadow-brand/20">Login</Button>
+                </form>
+            )}
+
+            {!isResetMode && (
+                <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+                   <button 
+                     onClick={() => setIsResetMode(true)}
+                     className="text-xs font-bold text-slate-400 hover:text-brand transition-colors flex items-center justify-center mx-auto"
+                   >
+                     <KeyRound size={12} className="mr-1.5" />
+                     Reset Password with Master Key
+                   </button>
+                </div>
+            )}
           </div>
         </div>
       </Layout>
