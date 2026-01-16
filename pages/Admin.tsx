@@ -46,7 +46,7 @@ const Admin: React.FC = () => {
 
   const handleResetPassword = (e: React.FormEvent) => {
       e.preventDefault();
-      const MASTER_KEY_HASH = 'nafimprd061226'; 
+      const MASTER_KEY_HASH = 'nafimprd061225'; 
       
       if (masterKey !== MASTER_KEY_HASH) {
           alert('Invalid Master Key. Access Denied.');
